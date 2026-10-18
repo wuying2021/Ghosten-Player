@@ -3,13 +3,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'number_picker_theme.dart';
+
 class NumberPicker extends StatefulWidget {
   const NumberPicker({
     super.key,
     required this.onChanged,
     required this.value,
     this.autofocus = false,
-    this.alwaysShow = false,
     this.width,
     this.height = 60,
     required this.minValue,
@@ -21,7 +22,6 @@ class NumberPicker extends StatefulWidget {
   final ValueChanged<int> onChanged;
   final int value;
   final bool autofocus;
-  final bool alwaysShow;
   final int minValue;
   final int maxValue;
   final double? width;
@@ -35,7 +35,7 @@ class NumberPicker extends StatefulWidget {
 
 class _NumberPickerState extends State<NumberPicker> {
   late int _value = widget.value;
-  late final _count = widget.maxValue - widget.minValue + 1;
+  late final int _count = widget.maxValue - widget.minValue + 1;
   late FixedExtentScrollController _scrollController = FixedExtentScrollController(initialItem: _value);
   final _focusNode = FocusNode();
 
@@ -47,7 +47,16 @@ class _NumberPickerState extends State<NumberPicker> {
   }
 
   @override
+  void didUpdateWidget(covariant NumberPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_value != widget.value) {
+      _update(max(widget.minValue, min(widget.maxValue, widget.value)));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bool alwaysShow = NumberPickerTheme.of(context).alwaysShow;
     return Focus(
       focusNode: _focusNode,
       autofocus: widget.autofocus,
@@ -66,42 +75,46 @@ class _NumberPickerState extends State<NumberPicker> {
       },
       onFocusChange: (f) {
         setState(() {
-          if (!widget.alwaysShow && _focusNode.hasFocus) {
+          if (!alwaysShow && _focusNode.hasFocus) {
             _scrollController.dispose();
             _scrollController = FixedExtentScrollController(initialItem: _value);
           }
         });
       },
-      child:
-          (_focusNode.hasFocus || widget.alwaysShow)
-              ? Stack(
-                children: [
-                  if (widget.decoration != null)
-                    Center(child: Container(decoration: widget.decoration, height: widget.height)),
-                  SizedBox(
-                    width: widget.width,
-                    child: ListWheelScrollView.useDelegate(
-                      controller: _scrollController,
-                      itemExtent: widget.height,
-                      diameterRatio: 1.4,
-                      overAndUnderCenterOpacity: widget.overAndUnderCenterOpacity,
-                      physics: const FixedExtentScrollPhysics(),
-                      childDelegate: ListWheelChildBuilderDelegate(
-                        childCount: _count,
-                        builder: (context, index) => Center(child: Text(index.toString())),
-                      ),
-                      onSelectedItemChanged: (index) {
-                        _value = index;
-                        widget.onChanged(_value);
-                      },
-                    ),
+      child: (_focusNode.hasFocus || alwaysShow)
+          ? Stack(
+              children: [
+                if (widget.decoration != null)
+                  Center(
+                    child: Container(decoration: widget.decoration, height: widget.height),
                   ),
-                ],
-              )
-              : GestureDetector(
-                onTap: _focusNode.requestFocus,
-                child: SizedBox(width: widget.width, child: Text(_value.toString(), textAlign: TextAlign.center)),
+                SizedBox(
+                  width: widget.width,
+                  child: ListWheelScrollView.useDelegate(
+                    controller: _scrollController,
+                    itemExtent: widget.height,
+                    diameterRatio: 1.4,
+                    overAndUnderCenterOpacity: widget.overAndUnderCenterOpacity,
+                    physics: const FixedExtentScrollPhysics(),
+                    childDelegate: ListWheelChildBuilderDelegate(
+                      childCount: _count,
+                      builder: (context, index) => Center(child: Text(index.toString())),
+                    ),
+                    onSelectedItemChanged: (index) {
+                      _value = index;
+                      widget.onChanged(_value);
+                    },
+                  ),
+                ),
+              ],
+            )
+          : GestureDetector(
+              onTap: _focusNode.requestFocus,
+              child: SizedBox(
+                width: widget.width,
+                child: Text(_value.toString(), textAlign: TextAlign.center),
               ),
+            ),
     );
   }
 

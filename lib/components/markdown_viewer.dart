@@ -4,7 +4,7 @@ import 'package:markdown/markdown.dart' as m;
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-import 'html_support.dart';
+import '_html_support.dart';
 
 class MarkdownViewer extends StatelessWidget {
   const MarkdownViewer({super.key, required this.data, this.padding, this.tocController, this.autoScrollController});
@@ -51,7 +51,7 @@ class CustomTextNode extends ElementNode {
 
   @override
   void onAccepted(SpanNode parent) {
-    final textStyle = config.p.textStyle.merge(parentStyle);
+    final TextStyle textStyle = config.p.textStyle.merge(parentStyle);
     children.clear();
     if (!text.contains(htmlRep)) {
       accept(TextNode(text: text, style: textStyle));
@@ -63,7 +63,7 @@ class CustomTextNode extends ElementNode {
       return;
     }
 
-    final spans = parseHtml(
+    final List<SpanNode> spans = parseHtml(
       m.Text(text),
       visitor: WidgetVisitor(
         config: visitor.config,

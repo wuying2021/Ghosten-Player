@@ -1,21 +1,10 @@
-import 'dart:math';
-
+import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:scaled_app/scaled_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/player.dart';
 
 import '/utils/utils.dart';
-
-enum SystemLanguage {
-  zh,
-  en,
-  auto;
-
-  static SystemLanguage fromString(String? str) {
-    return SystemLanguage.values.firstWhere((element) => element.name == str, orElse: () => SystemLanguage.auto);
-  }
-}
 
 enum AutoUpdateFrequency {
   always,
@@ -39,21 +28,20 @@ extension FromString on ThemeMode {
 
 class UserConfig extends ChangeNotifier {
   UserConfig._fromPrefs(this.prefs)
-    : language = SystemLanguage.fromString(prefs.getString('system.language')),
+    : language = SupportedLanguages.fromString(prefs.getString('system.language')),
       themeMode = FromString.fromString(prefs.getString('system.themeMode')),
       autoUpdateFrequency = AutoUpdateFrequency.fromString(prefs.getString('system.autoUpdateFrequency')),
       lastCheckUpdateTime = DateTime.tryParse(prefs.getString('system.lastCheckUpdateTime') ?? ''),
       updatePrerelease = prefs.getBool('system.updatePrerelease') ?? false,
       githubProxy = /*prefs.getString('system.githubProxy') ??*/ '',
-      autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
       autoPip = prefs.getBool('playerConfig.autoPip') ?? false,
       playerType = PlayerType.fromString(prefs.getString('playerConfig.playerType')),
       mpvVersion = prefs.getString('playerConfig.mpvVersion'),
       autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
       displayScale = prefs.getDouble('system.displayScale') ?? 1,
-      showPerformanceOverlay = false;
+      showPerformanceOverlay = prefs.getBool('system.showPerformanceOverlay') ?? false;
   final SharedPreferences prefs;
-  SystemLanguage language;
+  SupportedLanguages language;
   ThemeMode themeMode;
   AutoUpdateFrequency autoUpdateFrequency;
   PlayerType playerType;
@@ -61,14 +49,13 @@ class UserConfig extends ChangeNotifier {
   bool updatePrerelease;
   String githubProxy;
   DateTime? lastCheckUpdateTime;
-  bool autoPlay;
   bool autoForceLandscape;
   bool autoPip;
   double displayScale;
   bool showPerformanceOverlay;
 
   static Future<UserConfig> init() async {
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     return UserConfig._fromPrefs(prefs);
   }
 
@@ -85,12 +72,6 @@ class UserConfig extends ChangeNotifier {
   void setUpdatePrerelease(bool f) {
     updatePrerelease = f;
     prefs.setBool('system.updatePrerelease', updatePrerelease);
-  }
-
-  void setAutoPlay(bool a) {
-    autoPlay = a;
-    notifyListeners();
-    prefs.setBool('playerConfig.autoPlay', autoPlay);
   }
 
   void setAutoForceLandscape(bool a) {
@@ -111,7 +92,7 @@ class UserConfig extends ChangeNotifier {
     prefs.setString('system.themeMode', themeMode.name);
   }
 
-  void setLanguage(SystemLanguage language) {
+  void setLanguage(SupportedLanguages language) {
     this.language = language;
     notifyListeners();
     prefs.setString('system.language', language.name);
@@ -136,7 +117,7 @@ class UserConfig extends ChangeNotifier {
   void setDisplayScale(double s) {
     if (displayScale != s) {
       displayScale = s;
-      ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * displayScale;
+      ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => displayScale;
       prefs.setDouble('system.displayScale', displayScale);
     }
   }
@@ -144,6 +125,7 @@ class UserConfig extends ChangeNotifier {
   void setShowPerformanceOverlay(bool showPerformanceOverlay) {
     this.showPerformanceOverlay = showPerformanceOverlay;
     notifyListeners();
+    prefs.setBool('system.showPerformanceOverlay', showPerformanceOverlay);
   }
 
   bool shouldCheckUpdate() {
@@ -175,9 +157,9 @@ class UserConfig extends ChangeNotifier {
 
   Locale? get locale {
     return switch (language) {
-      SystemLanguage.zh => const Locale('zh', 'CN'),
-      SystemLanguage.en => const Locale('en', 'US'),
-      SystemLanguage.auto => null,
+      SupportedLanguages.zhCn => const Locale('zh', 'CN'),
+      SupportedLanguages.enUs => const Locale('en', 'US'),
+      SupportedLanguages.auto => null,
     };
   }
 }

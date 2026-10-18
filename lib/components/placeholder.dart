@@ -1,48 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
-class GPlaceholder extends StatelessWidget {
-  const GPlaceholder({super.key, required this.child});
+class PlaceholderRRect extends StatelessWidget {
+  const PlaceholderRRect({super.key, this.width, this.height, this.borderRadius});
 
-  final Widget child;
+  final double? width;
+  final double? height;
+  final BorderRadiusGeometry? borderRadius;
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Theme.of(context).colorScheme.surfaceContainerLow,
-      highlightColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: IgnorePointer(child: child),
+    return SizedBox(
+      width: width,
+      height: height,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(8)),
+          color: Theme.of(context).colorScheme.surfaceContainer,
+        ),
+      ),
     );
   }
 }
 
-class GPlaceholderDecoration {
-  static const base = BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(4)), color: Colors.white);
-  static const lite = BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(4)), color: Colors.white60);
-}
-
-class GPlaceholderRect extends StatelessWidget {
-  const GPlaceholderRect({super.key, this.width, this.height, this.padding});
+class PlaceholderImage extends StatelessWidget {
+  const PlaceholderImage({super.key, this.width, this.height, this.padding, this.borderRadius});
 
   final double? width;
   final double? height;
   final EdgeInsetsGeometry? padding;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: padding ?? EdgeInsets.zero,
-      child: SizedBox(width: width, height: height, child: const DecoratedBox(decoration: GPlaceholderDecoration.lite)),
-    );
-  }
-}
-
-class GPlaceholderImage extends StatelessWidget {
-  const GPlaceholderImage({super.key, this.width, this.height, this.padding});
-
-  final double? width;
-  final double? height;
-  final EdgeInsetsGeometry? padding;
+  final BorderRadiusGeometry? borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +37,13 @@ class GPlaceholderImage extends StatelessWidget {
       child: SizedBox(
         width: width,
         height: height,
-        child: const DecoratedBox(decoration: GPlaceholderDecoration.lite, child: Icon(Icons.image_outlined, size: 56)),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(8)),
+            color: Theme.of(context).colorScheme.surfaceContainer,
+          ),
+          child: Icon(Icons.image_outlined, size: 50, color: Theme.of(context).colorScheme.surfaceContainerHigh),
+        ),
       ),
     );
   }

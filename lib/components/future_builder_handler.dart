@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../pages/components/loading.dart';
 import 'error_message.dart';
+import 'loading.dart';
 
 class FutureBuilderHandler<T> extends StatelessWidget {
   const FutureBuilderHandler({
@@ -28,15 +28,18 @@ class FutureBuilderHandler<T> extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.done) {
           return snapshot.hasError
               ? errorBuilder != null
-                  ? errorBuilder!(context, snapshot)
-                  : Center(child: ErrorMessage(error: snapshot.error))
+                    ? errorBuilder!(context, snapshot)
+                    : Center(child: ErrorMessage(error: snapshot.error))
               : builder(context, snapshot);
         } else {
           return snapshot.hasData
               ? builder(context, snapshot)
               : loadingBuilder != null
               ? loadingBuilder!(context, snapshot)
-              : const Center(child: Loading());
+              : const Material(
+                  type: .transparency,
+                  child: Center(child: Loading()),
+                );
         }
       },
     );
@@ -52,13 +55,11 @@ class FutureBuilderSliverHandler<T> extends StatelessWidget {
     this.loading = const Center(child: Loading()),
     this.errorBuilder,
     this.loadingBuilder,
-    this.fillRemaining = false,
   });
 
   final AsyncWidgetBuilder<T> builder;
   final AsyncWidgetBuilder<T>? errorBuilder;
   final AsyncWidgetBuilder<T>? loadingBuilder;
-  final bool fillRemaining;
   final Future<T>? future;
   final T? initialData;
   final Widget loading;
@@ -72,22 +73,16 @@ class FutureBuilderSliverHandler<T> extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.done) {
           return snapshot.hasError
               ? errorBuilder != null
-                  ? fillRemaining
-                      ? SliverFillRemaining(child: errorBuilder!(context, snapshot))
-                      : SliverToBoxAdapter(child: errorBuilder!(context, snapshot))
-                  : fillRemaining
-                  ? SliverFillRemaining(child: Center(child: ErrorMessage(error: snapshot.error)))
-                  : SliverToBoxAdapter(child: Center(child: ErrorMessage(error: snapshot.error)))
+                    ? errorBuilder!(context, snapshot)
+                    : SliverToBoxAdapter(
+                        child: Center(child: ErrorMessage(error: snapshot.error)),
+                      )
               : builder(context, snapshot);
         } else {
           return snapshot.hasData
               ? builder(context, snapshot)
               : loadingBuilder != null
-              ? fillRemaining
-                  ? SliverFillRemaining(child: loadingBuilder!(context, snapshot))
-                  : SliverToBoxAdapter(child: loadingBuilder!(context, snapshot))
-              : fillRemaining
-              ? SliverFillRemaining(child: Center(child: loading))
+              ? loadingBuilder!(context, snapshot)
               : SliverToBoxAdapter(child: Center(child: loading));
         }
       },

@@ -16,7 +16,7 @@ class _PlayingIconState extends State<PlayingIcon> with SingleTickerProviderStat
   late final animation = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat();
   final count = 4;
   final speed = 4;
-  late final array = List.generate(count, (_) => (Random().nextDouble(), Random().nextDouble()));
+  late final List<(double, double)> array = List.generate(count, (_) => (Random().nextDouble(), Random().nextDouble()));
 
   @override
   void dispose() {
@@ -26,8 +26,8 @@ class _PlayingIconState extends State<PlayingIcon> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final spacing = widget.size / (count + 1) / (count - 1);
-    final width = widget.size / (count + 1);
+    final double spacing = widget.size / (count + 1) / (count - 1);
+    final double width = widget.size / (count + 1);
     final decoration = BoxDecoration(color: widget.color, borderRadius: BorderRadius.circular(widget.size / 16));
     return Padding(
       padding: const EdgeInsets.all(8),
@@ -35,18 +35,14 @@ class _PlayingIconState extends State<PlayingIcon> with SingleTickerProviderStat
         dimension: widget.size,
         child: AnimatedBuilder(
           animation: animation,
-          builder:
-              (context, child) => Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: spacing,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children:
-                    array
-                        .map(
-                          (entry) => Container(decoration: decoration, width: width, height: h(1 + entry.$1, entry.$2)),
-                        )
-                        .toList(),
-              ),
+          builder: (context, child) => Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: spacing,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: array
+                .map((entry) => Container(decoration: decoration, width: width, height: h(1 + entry.$1, entry.$2)))
+                .toList(),
+          ),
         ),
       ),
     );

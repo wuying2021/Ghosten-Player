@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../const.dart';
+import '../constants.dart';
 import '../l10n/app_localizations.dart';
 
 class NoData extends StatelessWidget {
@@ -10,11 +10,12 @@ class NoData extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final int cacheSize = (MediaQuery.of(context).devicePixelRatio * 200).round();
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(assetsNoData, width: 200, height: 200),
+          Image.asset(assetsNoData, width: 200, height: 200, cacheWidth: cacheSize, cacheHeight: cacheSize),
           Padding(
             padding: action == null ? const EdgeInsets.only(bottom: 16) : EdgeInsets.zero,
             child: Text(AppLocalizations.of(context)!.noData),

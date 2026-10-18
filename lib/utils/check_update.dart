@@ -1,31 +1,31 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../const.dart';
+import '../constants.dart';
 import '../platform_api.dart';
+import 'utils.dart';
 
 final currentVersion = Version.fromString(appVersion);
 
 Future<UpdateData?> checkUpdate(bool prerelease) async {
-  if (!Platform.isAndroid) {
+  if (kIsWeb) {
     return null;
   }
-  final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get(updateUrl);
+  final Response<dynamic> res = await cacheHttpClient.get(updateUrl);
   final Iterable<UpdateResp> data = (res.data as List<dynamic>)
       .cast<Map<String, dynamic>>()
       .map(UpdateResp.fromJson)
       .where((el) => prerelease || !el.prerelease);
 
-  final latest = data.first;
-  final suffix = switch (appFlavor) {
+  final UpdateResp latest = data.first;
+  final String suffix = switch (appFlavor) {
     'tv' => '-tv',
     _ => '',
   };
-  final arch = await PlatformApi.arch();
-  final url = latest.assets.firstWhereOrNull((item) => item.name == 'app-$arch$suffix-release.apk')?.url;
+  final String? arch = await PlatformApi.arch();
+  final String? url = latest.assets.firstWhereOrNull((item) => item.name == 'app-$arch$suffix-release.apk')?.url;
   if (url != null && currentVersion < latest.version) {
     return UpdateData(
       url: url,
@@ -47,19 +47,19 @@ class Version {
   Version.unknown() : major = 0, minor = 0, patch = 0, alpha = null, beta = null;
 
   factory Version.fromString(String s) {
-    final arr = s.split('-');
-    final pre = arr.elementAtOrNull(0);
-    final suf = arr.elementAtOrNull(1);
+    final List<String> arr = s.split('-');
+    final String? pre = arr.elementAtOrNull(0);
+    final String? suf = arr.elementAtOrNull(1);
     if (pre == null) {
       return Version.unknown();
     } else {
-      final list = pre.split('.');
+      final List<String> list = pre.split('.');
       if (list.length != 3) {
         return Version.unknown();
       }
-      final major = int.tryParse(list[0]);
-      final minor = int.tryParse(list[1]);
-      final patch = int.tryParse(list[2]);
+      final int? major = int.tryParse(list[0]);
+      final int? minor = int.tryParse(list[1]);
+      final int? patch = int.tryParse(list[2]);
       if (major == null || minor == null || patch == null) {
         return Version.unknown();
       }

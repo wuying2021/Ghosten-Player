@@ -21,31 +21,32 @@ class _QuitConfirmState extends State<QuitConfirm> {
     return kIsWeb
         ? widget.child
         : PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) {
-          return;
-        }
-        if (Navigator.of(context).canPop()) {
-          return;
-        }
-        if (confirmed) {
-          confirmed = false;
-          SystemNavigator.pop();
-        } else {
-          confirmed = true;
-          final controller = ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.confirmTextExit, textAlign: TextAlign.center),
-              duration: const Duration(seconds: 2),
-              behavior: SnackBarBehavior.floating,
-              width: 200,
-            ),
+            canPop: false,
+            onPopInvokedWithResult: (didPop, r) {
+              if (didPop) {
+                return;
+              }
+              if (Navigator.of(context).canPop()) {
+                // Navigator.of(context).pop();
+                return;
+              }
+              if (confirmed) {
+                confirmed = false;
+                SystemNavigator.pop();
+              } else {
+                confirmed = true;
+                final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller = ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)!.confirmTextExit, textAlign: TextAlign.center),
+                    duration: const Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                    width: 200,
+                  ),
+                );
+                controller.closed.then((_) => confirmed = false);
+              }
+            },
+            child: widget.child,
           );
-          controller.closed.then((_) => confirmed = false);
-        }
-      },
-      child: widget.child,
-    );
   }
 }

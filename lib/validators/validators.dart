@@ -4,7 +4,7 @@ import '../l10n/app_localizations.dart';
 
 String? yearValidator(BuildContext context, String? value) {
   if (value != null && value.isNotEmpty) {
-    final year = int.tryParse(value);
+    final int? year = int.tryParse(value);
     if (year == null || year < 1900 || year > 2100) {
       return AppLocalizations.of(context)!.formValidatorYear;
     }

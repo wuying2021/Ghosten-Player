@@ -1,6 +1,5 @@
 package com.ghosten.player
 
-import android.app.UiModeManager
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
@@ -24,23 +23,13 @@ class MainActivity : FragmentActivity() {
 
         super.onCreate(savedInstanceState)
 
-        mainFragment = if (intent.scheme == "content") {
-            ensureFlutterFragmentCreated(
-                PLAYER_FRAGMENT, "player", listOf(androidDeviceType().toString(), intent.data?.toString())
-            )
-        } else if (androidDeviceType() == DEVICE_TYPE_TV) {
-            ensureFlutterFragmentCreated(
-                MAIN_FRAGMENT,
-                "main",
+        mainFragment = ensureFlutterFragmentCreated(
+            MAIN_FRAGMENT, "main", if (intent.scheme == "content") {
+                listOf(androidDeviceType().toString(), intent.data?.toString())
+            } else {
                 listOf(androidDeviceType().toString())
-            )
-        } else {
-            ensureFlutterFragmentCreated(
-                MAIN_FRAGMENT,
-                "main",
-                listOf(androidDeviceType().toString())
-            )
-        }
+            }
+        )
         registerOnBackInvokedCallback()
     }
 
@@ -178,10 +167,7 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun androidDeviceType(): Int {
-        val uiModeManager = getSystemService(UI_MODE_SERVICE) as UiModeManager
-        return if (uiModeManager.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION) {
-            DEVICE_TYPE_TV
-        } else if (resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE) {
+        return if (resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE) {
             DEVICE_TYPE_PAD
         } else {
             DEVICE_TYPE_PHONE
@@ -189,10 +175,8 @@ class MainActivity : FragmentActivity() {
     }
 
     companion object {
-        private const val DEVICE_TYPE_TV = 0
+        private const val DEVICE_TYPE_PHONE = 0
         private const val DEVICE_TYPE_PAD = 1
-        private const val DEVICE_TYPE_PHONE = 2
         private const val MAIN_FRAGMENT = "main_fragment"
-        private const val PLAYER_FRAGMENT = "player_fragment"
     }
 }

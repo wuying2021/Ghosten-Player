@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -25,20 +26,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get actAs => 'as';
-
-  @override
-  String audioDecoder(String decoder) {
-    String _temp0 = intl.Intl.selectLogic(decoder, {
-      '1': 'Use Extension Decoder',
-      '0': 'Not Use Extension Decoder',
-      '2': 'Prefer to Use Extension Decoder',
-      'other': 'Unknown',
-    });
-    return '$_temp0';
-  }
-
-  @override
-  String get audioDecoderLabel => 'Audio Decode';
 
   @override
   String get autoCheckForUpdates => 'Auto Check For Updates';
@@ -368,6 +355,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorLoadData => 'Load data failed';
+
+  @override
+  String extensionRendererMode(String decoder) {
+    String _temp0 = intl.Intl.selectLogic(decoder, {
+      '1': 'Use Extension Decoder',
+      '0': 'Not Use Extension Decoder',
+      '2': 'Prefer to Use Extension Decoder',
+      'other': 'Unknown',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get extensionRendererModeLabel => 'Audio Decode';
 
   @override
   String fileCategory(String category) {
@@ -751,9 +752,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String seriesStatus(String status) {
     String _temp0 = intl.Intl.selectLogic(status, {
       'returningSeries': 'Returning Series',
+      'planned': 'Planned',
+      'inProduction': 'In Production',
       'ended': 'Ended',
+      'canceled': 'Canceled',
+      'pilot': 'Pilot',
+      'rumored': 'Rumored',
+      'postProduction': 'Post Production',
       'released': 'Released',
-      'other': '$status',
+      'other': 'Unknown',
     });
     return '$_temp0';
   }
@@ -947,8 +954,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subtitleSettingWindowColor => 'Window Color';
 
   @override
-  String systemLanguage(String language) {
-    String _temp0 = intl.Intl.selectLogic(language, {'zh': '简体中文', 'en': 'English', 'other': 'Auto'});
+  String supportedLanguage(String language) {
+    String _temp0 = intl.Intl.selectLogic(language, {'zhCn': '简体中文', 'enUs': 'English', 'other': 'Auto'});
     return '$_temp0';
   }
 

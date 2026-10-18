@@ -3,7 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../utils/utils.dart';
-import '../views/image_viewer.dart';
 
 class AsyncImage extends StatelessWidget {
   const AsyncImage(
@@ -41,60 +40,66 @@ class AsyncImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final int? cacheWidth = width != null ? (devicePixelRatio * width!).round() : null;
+    final int? cacheHeight = height != null ? (devicePixelRatio * height!).round() : null;
+    final String imageUrl = _resoleSrc();
     final image = Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(borderRadius: radius),
       child: CachedNetworkImage(
-        imageUrl: _resoleSrc(),
+        cacheKey: imageUrl,
+        imageUrl: imageUrl,
         alignment: alignment,
         fit: fit,
         filterQuality: FilterQuality.medium,
         width: width,
         height: height,
-        memCacheWidth: width != null ? (devicePixelRatio * width!).toInt() : null,
-        memCacheHeight: height != null ? (devicePixelRatio * height!).toInt() : null,
-        httpHeaders:
-            src.startsWith('https://media.themoviedb.org')
-                ? httpHeaders ?? const {'referer': 'https://www.themoviedb.org/'}
-                : httpHeaders,
-        errorListener: (_) {},
+        memCacheWidth: cacheWidth,
+        memCacheHeight: cacheHeight,
+        httpHeaders: src.startsWith('https://media.themoviedb.org')
+            ? httpHeaders ?? const {'referer': 'https://www.themoviedb.org/'}
+            : httpHeaders,
+        errorListener: (error) async {
+          PaintingBinding.instance.imageCache.evict(CachedNetworkImageProvider(imageUrl));
+          await CachedNetworkImage.evictFromCache(imageUrl);
+        },
         errorWidget:
             errorWidget ??
-            (context, url, error) =>
-                showErrorWidget
-                    ? Center(
-                      child: Icon(
-                        Icons.broken_image,
-                        size: errorIconSize,
-                        color: Theme.of(context).colorScheme.error.withAlpha(0x33),
-                      ),
-                    )
-                    : const SizedBox(),
-        placeholder: (context, _) => needLoading ? const _AnimatedLoading() : const SizedBox(),
-        imageBuilder:
-            ink
-                ? (context, imageProvider) {
-                  return Padding(
-                    padding: padding,
-                    child: Ink(
-                      width: width,
-                      height: height,
-                      decoration: BoxDecoration(
-                        borderRadius: radius,
-                        image: DecorationImage(image: imageProvider, fit: fit, alignment: alignment),
-                      ),
+            (context, url, error) => showErrorWidget
+                ? Center(
+                    child: Icon(
+                      Icons.broken_image,
+                      size: errorIconSize,
+                      color: Theme.of(context).colorScheme.error.withAlpha(0x33),
                     ),
-                  );
-                }
-                : null,
+                  )
+                : const SizedBox(),
+        placeholder: (context, _) => needLoading ? const _AnimatedLoading() : const SizedBox(),
+        imageBuilder: ink
+            ? (context, imageProvider) {
+                return Ink(
+                  padding: padding,
+                  width: width,
+                  height: height,
+                  decoration: BoxDecoration(
+                    borderRadius: radius,
+                    image: DecorationImage(
+                      image: ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, imageProvider),
+                      fit: fit,
+                      alignment: alignment,
+                    ),
+                  ),
+                );
+              }
+            : null,
       ),
     );
     return viewable
         ? GestureDetector(
-          onLongPress: () => navigateTo(navigatorKey.currentContext!, ImageViewer(url: Uri.parse(src))),
-          child: image,
-        )
+            onLongPress: () => context.pushNamed(.imageViewer, arguments: {'url': Uri.parse(src)}),
+            child: image,
+          )
         : image;
   }
 
@@ -130,16 +135,15 @@ class _AnimatedLoadingState extends State<_AnimatedLoading> with TickerProviderS
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _animationController,
-      builder:
-          (context, _) => DecoratedBox(
-            decoration: BoxDecoration(
-              color: Color.lerp(
-                Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.surfaceContainerHigh,
-                _animationController.value,
-              ),
-            ),
+      builder: (context, _) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: Color.lerp(
+            Theme.of(context).colorScheme.surface,
+            Theme.of(context).colorScheme.surfaceContainerHigh,
+            _animationController.value,
           ),
+        ),
+      ),
     );
   }
 }

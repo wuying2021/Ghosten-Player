@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'error_message.dart';
+import 'loading.dart';
 
 class StreamBuilderHandler<T> extends StatelessWidget {
   const StreamBuilderHandler({super.key, required this.builder, this.stream, this.initialData});
@@ -17,9 +18,7 @@ class StreamBuilderHandler<T> extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            return snapshot.hasError
-                ? Center(child: ErrorMessage(error: snapshot.error))
-                : const Center(child: CircularProgressIndicator());
+            return Center(child: snapshot.hasError ? ErrorMessage(error: snapshot.error) : const Loading());
           case ConnectionState.none:
           case ConnectionState.active:
           case ConnectionState.done:
@@ -49,16 +48,20 @@ class StreamBuilderSliverHandler<T> extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
+          case ConnectionState.active:
             return snapshot.hasError
-                ? SliverToBoxAdapter(child: Center(child: ErrorMessage(error: snapshot.error)))
+                ? SliverToBoxAdapter(
+                    child: Center(child: ErrorMessage(error: snapshot.error)),
+                  )
                 : snapshot.hasData
                 ? builder(context, snapshot)
-                : const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+                : const SliverFillRemaining(child: Center(child: Loading()));
           case ConnectionState.none:
-          case ConnectionState.active:
           case ConnectionState.done:
             return snapshot.hasError
-                ? SliverFillRemaining(child: Center(child: ErrorMessage(error: snapshot.error)))
+                ? SliverFillRemaining(
+                    child: Center(child: ErrorMessage(error: snapshot.error)),
+                  )
                 : snapshot.hasData
                 ? builder(context, snapshot)
                 : const SliverToBoxAdapter();

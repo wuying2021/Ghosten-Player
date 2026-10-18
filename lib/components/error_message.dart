@@ -23,7 +23,7 @@ class ErrorMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final exception = _toCommonException(context);
+    final CommonException exception = _toCommonException(context);
     final child = ConstrainedBox(
       constraints: BoxConstraints(minHeight: minHeight ?? 80),
       child: Column(
@@ -42,6 +42,7 @@ class ErrorMessage extends StatelessWidget {
                   Text(exception.code, style: Theme.of(context).textTheme.titleMedium),
                   if (kDebugMode && (exception.details?.toString().isNotEmpty ?? false))
                     Text(exception.details.toString()),
+                  if (kDebugMode && exception.stackTrace != null) Text(exception.stackTrace.toString()),
                 ],
               ),
             ),
@@ -51,13 +52,19 @@ class ErrorMessage extends StatelessWidget {
     );
     if (safeArea) {
       if (padding != null) {
-        return SingleChildScrollView(child: SafeArea(child: Padding(padding: padding!, child: child)));
+        return SingleChildScrollView(
+          child: SafeArea(
+            child: Padding(padding: padding!, child: child),
+          ),
+        );
       } else {
         return SingleChildScrollView(child: SafeArea(child: child));
       }
     } else {
       if (padding != null) {
-        return SingleChildScrollView(child: Padding(padding: padding!, child: child));
+        return SingleChildScrollView(
+          child: Padding(padding: padding!, child: child),
+        );
       } else {
         return SingleChildScrollView(child: child);
       }
@@ -84,6 +91,7 @@ class ErrorMessage extends StatelessWidget {
         ),
         stackTrace: error.stackTrace,
       ),
+      final Error error => CommonException(code: error.toString(), stackTrace: error.stackTrace),
       _ => CommonException(code: error.toString()),
     };
   }

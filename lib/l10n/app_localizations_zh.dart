@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -25,15 +26,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get actAs => '饰演';
-
-  @override
-  String audioDecoder(String decoder) {
-    String _temp0 = intl.Intl.selectLogic(decoder, {'1': '启用拓展解码器', '0': '禁用拓展解码器', '2': '优先使用拓展解码器', 'other': '未知'});
-    return '$_temp0';
-  }
-
-  @override
-  String get audioDecoderLabel => '音频解码方式';
 
   @override
   String get autoCheckForUpdates => '自动检查更新';
@@ -102,13 +94,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get buttonLastWatchedTime => '观看时间';
 
   @override
-  String get buttonMarkFavorite => '标记为喜欢';
+  String get buttonMarkFavorite => '标记喜欢';
 
   @override
-  String get buttonMarkNotPlayed => '标记为未观看';
+  String get buttonMarkNotPlayed => '取消标记已观看';
 
   @override
-  String get buttonMarkPlayed => '标记为已观看';
+  String get buttonMarkPlayed => '标记已观看';
 
   @override
   String get buttonMore => '更多';
@@ -361,6 +353,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get errorLoadData => '数据获取失败';
+
+  @override
+  String extensionRendererMode(String decoder) {
+    String _temp0 = intl.Intl.selectLogic(decoder, {'1': '启用拓展解码器', '0': '禁用拓展解码器', '2': '优先使用拓展解码器', 'other': '未知'});
+    return '$_temp0';
+  }
+
+  @override
+  String get extensionRendererModeLabel => '拓展解码器';
 
   @override
   String fileCategory(String category) {
@@ -739,9 +740,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String seriesStatus(String status) {
     String _temp0 = intl.Intl.selectLogic(status, {
       'returningSeries': '回归剧',
+      'planned': '计划',
+      'inProduction': '拍摄中/制作中',
       'ended': '已完结',
+      'canceled': '已取消',
+      'pilot': '试播集',
+      'rumored': '传闻',
+      'postProduction': '后期制作',
       'released': '已上映',
-      'other': '$status',
+      'other': '未知',
     });
     return '$_temp0';
   }
@@ -933,8 +940,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subtitleSettingWindowColor => '窗口颜色';
 
   @override
-  String systemLanguage(String language) {
-    String _temp0 = intl.Intl.selectLogic(language, {'zh': '简体中文', 'en': 'English', 'other': '自动'});
+  String supportedLanguage(String language) {
+    String _temp0 = intl.Intl.selectLogic(language, {'zhCn': '简体中文', 'enUs': 'English', 'other': '自动'});
     return '$_temp0';
   }
 

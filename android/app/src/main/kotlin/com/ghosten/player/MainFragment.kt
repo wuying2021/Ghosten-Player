@@ -17,6 +17,9 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugins.GeneratedPluginRegistrant
+import java.net.InetAddress
+import java.net.NetworkInterface
+import java.util.*
 
 class MainFragment : FlutterFragment(), MethodCallHandler {
     private var methodChannel: MethodChannel? = null
@@ -78,6 +81,7 @@ class MainFragment : FlutterFragment(), MethodCallHandler {
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "arch" -> result.success(arch())
+            "localIpAddress" -> result.success(localIpAddress())
             else -> result.notImplemented()
         }
     }
@@ -134,7 +138,7 @@ class MainFragment : FlutterFragment(), MethodCallHandler {
     }
 
     @RequiresApi(API_LEVELS.API_34)
-    fun commitBackGesture() {
+    override fun commitBackGesture() {
         ensureAlive()
         if (flutterEngine != null) {
             flutterEngine!!.backGestureChannel.commitBackGesture()
@@ -142,7 +146,7 @@ class MainFragment : FlutterFragment(), MethodCallHandler {
     }
 
     @RequiresApi(API_LEVELS.API_34)
-    fun cancelBackGesture() {
+    override fun cancelBackGesture() {
         ensureAlive()
         if (flutterEngine != null) {
             flutterEngine!!.backGestureChannel.cancelBackGesture()
@@ -155,6 +159,22 @@ class MainFragment : FlutterFragment(), MethodCallHandler {
         } else {
             "unknown"
         }
+    }
+
+    private fun localIpAddress(): String? {
+        val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
+        for (intf in interfaces) {
+            val addrs = Collections.list(intf.inetAddresses)
+            for (addr in addrs) {
+                if (!addr.isLoopbackAddress && addr is InetAddress) {
+                    val sAddr = addr.hostAddress
+                    if (sAddr != null && sAddr.indexOf(':') < 0) {
+                        return sAddr
+                    }
+                }
+            }
+        }
+        return null
     }
 
     private fun ensureAlive() {

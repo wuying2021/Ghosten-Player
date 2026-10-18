@@ -128,18 +128,6 @@ abstract class AppLocalizations {
   /// **'as'**
   String get actAs;
 
-  /// No description provided for @audioDecoder.
-  ///
-  /// In en, this message translates to:
-  /// **'{decoder, select, 1{Use Extension Decoder} 0{Not Use Extension Decoder} 2{Prefer to Use Extension Decoder} other{Unknown}}'**
-  String audioDecoder(String decoder);
-
-  /// No description provided for @audioDecoderLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Audio Decode'**
-  String get audioDecoderLabel;
-
   /// No description provided for @autoCheckForUpdates.
   ///
   /// In en, this message translates to:
@@ -631,6 +619,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Load data failed'**
   String get errorLoadData;
+
+  /// No description provided for @extensionRendererMode.
+  ///
+  /// In en, this message translates to:
+  /// **'{decoder, select, 1{Use Extension Decoder} 0{Not Use Extension Decoder} 2{Prefer to Use Extension Decoder} other{Unknown}}'**
+  String extensionRendererMode(String decoder);
+
+  /// No description provided for @extensionRendererModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Decode'**
+  String get extensionRendererModeLabel;
 
   /// No description provided for @fileCategory.
   ///
@@ -1229,7 +1229,7 @@ abstract class AppLocalizations {
   /// No description provided for @seriesStatus.
   ///
   /// In en, this message translates to:
-  /// **'{status, select, returningSeries{Returning Series} ended{Ended} released{Released} other{{status}}}'**
+  /// **'{status, select, returningSeries{Returning Series} planned{Planned} inProduction{In Production} ended{Ended} canceled{Canceled} pilot{Pilot} rumored{Rumored} postProduction{Post Production} released{Released} other{Unknown}}'**
   String seriesStatus(String status);
 
   /// No description provided for @serverFormItemLabelServer.
@@ -1580,11 +1580,11 @@ abstract class AppLocalizations {
   /// **'Window Color'**
   String get subtitleSettingWindowColor;
 
-  /// No description provided for @systemLanguage.
+  /// No description provided for @supportedLanguage.
   ///
   /// In en, this message translates to:
-  /// **'{language, select, zh{简体中文} en{English} other{Auto}}'**
-  String systemLanguage(String language);
+  /// **'{language, select, zhCn{简体中文} enUs{English} other{Auto}}'**
+  String supportedLanguage(String language);
 
   /// No description provided for @systemTheme.
   ///

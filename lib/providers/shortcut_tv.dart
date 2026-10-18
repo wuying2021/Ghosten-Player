@@ -24,7 +24,7 @@ class ShortcutTV extends ChangeNotifier {
   LogicalKeyboardKey channelsPanel;
 
   static Future<ShortcutTV> init() async {
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     return ShortcutTV._fromPrefs(prefs);
   }
 
