@@ -4,14 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/models.dart';
 import '../providers/shortcut_tv.dart';
+import '../utils/iptv_autoplay.dart';
 import '../utils/utils.dart';
 import 'components/clock.dart';
 import 'components/icon_button.dart';
 import 'media/live_list.dart';
-import 'media/movie_list.dart';
-import 'media/search.dart';
-import 'media/tv_list.dart';
+import 'player/live_player.dart';
 import 'settings/settings.dart';
 import 'utils/utils.dart';
 
@@ -26,8 +26,23 @@ class _HomeState extends State<TVHomePage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
   int tabIndex = 0;
-  bool reverse = false;
   bool confirmed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 打开软件后直接全屏播放上次观看的 IPTV 频道
+    WidgetsBinding.instance.addPostFrameCallback((_) => _autoPlay());
+  }
+
+  Future<void> _autoPlay() async {
+    final data = await IptvAutoPlay.load();
+    if (data == null || !mounted) return;
+    navigateTo(
+      context,
+      LivePlayerPage(playlist: data.$2.map(FromMedia.fromChannel).toList(), index: data.$3, playlistId: data.$1),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,11 +76,7 @@ class _HomeState extends State<TVHomePage> {
             }
             return !canPop;
           },
-          onTabChange:
-              (index) => setState(() {
-                reverse = true;
-                tabIndex = index;
-              }),
+          onTabChange: (index) => setState(() => tabIndex = index),
         ),
         endDrawer: NavigatorPopHandler(
           onPopWithResult: (_) => _navigatorKey.currentState!.maybePop(),
@@ -79,24 +90,8 @@ class _HomeState extends State<TVHomePage> {
             ),
           ),
         ),
-        body: PageTransitionSwitcher(
-          reverse: reverse,
-          duration: const Duration(milliseconds: 800),
-          transitionBuilder:
-              (child, primaryAnimation, secondaryAnimation) => SharedAxisTransition(
-                animation: primaryAnimation,
-                secondaryAnimation: secondaryAnimation,
-                transitionType: SharedAxisTransitionType.horizontal,
-                fillColor: Colors.transparent,
-                child: child,
-              ),
-          child: switch (tabIndex) {
-            0 => TVListPage(endDrawerNavigatorKey: _navigatorKey),
-            1 => MovieListPage(endDrawerNavigatorKey: _navigatorKey),
-            2 => const LiveListPage(),
-            _ => const SizedBox(),
-          },
-        ),
+        // 只保留直播（IPTV）
+        body: const LiveListPage(),
       ),
     );
   }
@@ -323,28 +318,9 @@ class _HomeAppbarState extends State<_HomeAppbar> {
                   padding: const EdgeInsets.only(left: 36, right: 48),
                   child: Row(
                     children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton.icon(
-                          label: Text(AppLocalizations.of(context)!.search),
-                          onPressed: () => navigateTo(context, const SearchPage(autofocus: true)),
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            iconColor: Colors.white,
-                            foregroundColor: Theme.of(context).colorScheme.onSurface,
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          icon: const Icon(Icons.search_rounded, size: 20, color: Colors.grey),
-                        ),
-                      ),
-                      const SizedBox(width: 60),
                       _HomeTabs(
                         activeIndex: widget.activeIndex,
-                        tabs: [
-                          AppLocalizations.of(context)!.homeTabTV,
-                          AppLocalizations.of(context)!.homeTabMovie,
-                          AppLocalizations.of(context)!.homeTabLive,
-                        ],
+                        tabs: [AppLocalizations.of(context)!.homeTabLive],
                         onTabChange: widget.onTabChange,
                       ),
                       const Spacer(),

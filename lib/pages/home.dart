@@ -5,8 +5,6 @@ import '../components/logo.dart';
 import '../l10n/app_localizations.dart';
 import 'components/mobile_builder.dart';
 import 'media/live_list.dart';
-import 'media/movie_list.dart';
-import 'media/tv_list.dart';
 import 'settings/settings.dart';
 
 class HomeView extends StatefulWidget {
@@ -19,11 +17,10 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   int index = 0;
 
+  // 只保留直播（IPTV）与设置
   Widget get child => switch (index) {
-    0 => const TVListPage(),
-    1 => const MovieListPage(),
-    2 => BlocProvider(create: (_) => IptvCubit(), child: const LiveListPage()),
-    3 => const SettingsPage(),
+    0 => BlocProvider(create: (_) => IptvCubit(), child: const LiveListPage()),
+    1 => const SettingsPage(),
     _ => const Placeholder(),
   };
 
@@ -47,7 +44,7 @@ class _HomeViewState extends State<HomeView> {
               }).toList(),
         ),
       ),
-      backgroundColor: index == 2 ? Colors.transparent : null,
+      backgroundColor: index == 0 ? Colors.transparent : null,
       body: Row(
         children: <Widget>[
           MobileBuilder(
@@ -83,12 +80,6 @@ class _HomeViewState extends State<HomeView> {
 
   List<_TabDestination> _destinations(BuildContext context) {
     return [
-      _TabDestination(AppLocalizations.of(context)!.homeTabTV, const Icon(Icons.tv_outlined), const Icon(Icons.tv)),
-      _TabDestination(
-        AppLocalizations.of(context)!.homeTabMovie,
-        const Icon(Icons.movie_creation_outlined),
-        const Icon(Icons.movie_creation),
-      ),
       _TabDestination(
         AppLocalizations.of(context)!.homeTabLive,
         const Icon(Icons.live_tv_outlined),

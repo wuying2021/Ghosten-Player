@@ -231,7 +231,11 @@ class _ChannelListState extends State<_ChannelList> {
                     onTap:
                         () => navigateTo(
                           navigatorKey.currentContext!,
-                          LivePlayerPage(playlist: playlist.map(FromMedia.fromChannel).toList(), index: index),
+                          LivePlayerPage(
+                            playlist: playlist.map(FromMedia.fromChannel).toList(),
+                            index: index,
+                            playlistId: widget.playlistId,
+                          ),
                         ),
                   );
                 },
@@ -357,6 +361,7 @@ class _ChannelListGroupedState extends State<_ChannelListGrouped> {
                                       LivePlayerPage(
                                         playlist: playlist.map(FromMedia.fromChannel).toList(),
                                         index: playlist.indexOf(item),
+                                        playlistId: widget.playlistId,
                                       ),
                                     ),
                               );

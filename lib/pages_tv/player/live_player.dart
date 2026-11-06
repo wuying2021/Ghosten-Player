@@ -16,15 +16,19 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/shortcut_tv.dart';
 import '../../providers/user_config.dart';
 import '../../theme.dart';
+import '../../utils/iptv_autoplay.dart';
 import '../../utils/utils.dart';
 import '../components/loading.dart';
 import '../components/setting.dart';
 
 class LivePlayerPage extends StatefulWidget {
-  const LivePlayerPage({super.key, required this.playlist, required this.index});
+  const LivePlayerPage({super.key, required this.playlist, required this.index, this.playlistId});
 
   final List<PlaylistItemDisplay<Channel>> playlist;
   final int index;
+
+  /// 所属播放列表 id，用于记录上次播放的频道
+  final int? playlistId;
 
   @override
   State<LivePlayerPage> createState() => _LivePlayerPageState();
@@ -56,6 +60,10 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
           _isShowControls.value = show;
         });
     _controller.index.addListener(() => _controlsStream.add(ControlsStreamStatus.show));
+    _controller.index.addListener(() {
+      final index = _controller.index.value;
+      if (widget.playlistId != null && index != null) IptvAutoPlay.save(widget.playlistId!, index);
+    });
     _controlsStream.add(ControlsStreamStatus.show);
     super.initState();
   }

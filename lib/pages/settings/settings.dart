@@ -8,16 +8,12 @@ import '../../components/scrollbar.dart';
 import '../../const.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/utils.dart';
-import '../account/account.dart';
-import '../library.dart';
 import '../player/singleton_player.dart';
 import '../utils/utils.dart';
 import 'settings_diagnostics.dart';
-import 'settings_downloader.dart';
 import 'settings_help.dart';
 import 'settings_log.dart';
 import 'settings_other.dart';
-import 'settings_player_history.dart';
 import 'settings_server.dart';
 import 'settings_sponsor.dart';
 import 'settings_updater.dart';
@@ -36,22 +32,6 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 16),
         children: [
           _buildItem(
-            AppLocalizations.of(context)!.settingsItemAccount,
-            Icons.account_box_outlined,
-            onTap: () => navigateTo(context, const AccountManage()),
-          ),
-          _buildItem(
-            AppLocalizations.of(context)!.settingsItemTV,
-            Icons.tv,
-            onTap: () => navigateTo(context, const LibraryManage(type: LibraryType.tv)),
-          ),
-          _buildItem(
-            AppLocalizations.of(context)!.settingsItemMovie,
-            Icons.movie_creation_outlined,
-            onTap: () => navigateTo(context, const LibraryManage(type: LibraryType.movie)),
-          ),
-          const Divider(),
-          _buildItem(
             AppLocalizations.of(context)!.buttonPlay,
             Icons.play_arrow_outlined,
             onTap: () async {
@@ -66,16 +46,6 @@ class SettingsPage extends StatelessWidget {
                 );
               }
             },
-          ),
-          _buildItem(
-            AppLocalizations.of(context)!.settingsItemPlayerHistory,
-            Icons.history_rounded,
-            onTap: () => navigateTo(context, const SystemSettingsPlayerHistory()),
-          ),
-          _buildItem(
-            AppLocalizations.of(context)!.settingsItemDownload,
-            Icons.download_outlined,
-            onTap: () => navigateTo(context, const SystemSettingsDownloader()),
           ),
           const Divider(),
           _buildItem(

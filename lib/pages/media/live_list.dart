@@ -10,6 +10,7 @@ import '../../components/no_data.dart';
 import '../../components/playing_icon.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/models.dart';
+import '../../utils/iptv_autoplay.dart';
 import '../components/image_card.dart';
 import '../components/loading.dart';
 import '../player/player_controls_lite.dart';
@@ -25,9 +26,17 @@ class LiveListPage extends StatefulWidget {
 
 class _LiveListPageState extends State<LiveListPage> {
   final _controller = PlayerController<Channel>();
+  int? _playlistId;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.index.addListener(_saveLastChannel);
+  }
 
   @override
   void dispose() {
+    _controller.index.removeListener(_saveLastChannel);
     _controller.dispose();
     super.dispose();
   }
@@ -44,7 +53,7 @@ class _LiveListPageState extends State<LiveListPage> {
             fit: FlexFit.tight,
             child: Column(
               children: [
-                PlayerControlsLite(_controller, artwork: Container(color: Colors.black)),
+                PlayerControlsLite(_controller, artwork: Container(color: Colors.black), initialized: _autoPlay),
                 Expanded(
                   child: Scaffold(
                     primary: false,
@@ -127,9 +136,7 @@ class _LiveListPageState extends State<LiveListPage> {
                                           trailing: const Icon(Icons.chevron_right),
                                           onTap: () async {
                                             if (MediaQuery.of(context).size.aspectRatio <= 1) {
-                                              final playlist = await Api.playlistChannelsQueryById(item.id);
-                                              _controller.setPlaylist(playlist.map(FromMedia.fromChannel).toList());
-                                              _controller.play();
+                                              await _playPlaylist(item.id);
                                               if (context.mounted) {
                                                 _showBottomSheet(
                                                   context: context,
@@ -145,9 +152,7 @@ class _LiveListPageState extends State<LiveListPage> {
                                                 );
                                               }
                                             } else {
-                                              final playlist = await Api.playlistChannelsQueryById(item.id);
-                                              _controller.setPlaylist(playlist.map(FromMedia.fromChannel).toList());
-                                              _controller.play();
+                                              await _playPlaylist(item.id);
                                             }
                                           },
                                         ),
@@ -187,9 +192,36 @@ class _LiveListPageState extends State<LiveListPage> {
     );
   }
 
+  /// 播放器初始化完成后，自动播放上次观看的频道（首次为第一个播放列表的第一个频道）
+  Future<void> _autoPlay() async {
+    final data = await IptvAutoPlay.load();
+    if (data == null || !mounted) return;
+    _playlistId = data.$1;
+    _controller.setPlaylist(data.$2.map(FromMedia.fromChannel).toList());
+    await _controller.next(data.$3);
+    await _controller.play();
+  }
+
+  Future<void> _playPlaylist(int playlistId) async {
+    final playlist = await Api.playlistChannelsQueryById(playlistId);
+    _playlistId = playlistId;
+    _controller.setPlaylist(playlist.map(FromMedia.fromChannel).toList());
+    if (_controller.index.value == null) await _controller.next(0);
+    await _controller.play();
+  }
+
+  void _saveLastChannel() {
+    final index = _controller.index.value;
+    if (_playlistId != null && index != null) IptvAutoPlay.save(_playlistId!, index);
+  }
+
   Future<void> _addPlaylist(BuildContext context) async {
     final flag = await showDialog(context: context, builder: (context) => const LiveEditPage());
-    if (flag == true && context.mounted) context.read<IptvCubit>().update();
+    if (flag == true && context.mounted) {
+      context.read<IptvCubit>().update();
+      // 首次添加播放列表后直接开始播放
+      if (_controller.playlist.value.isEmpty) _autoPlay();
+    }
   }
 
   void _showBottomSheet<T>({required BuildContext context, required WidgetBuilder builder}) {
