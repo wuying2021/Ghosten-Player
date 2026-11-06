@@ -34,7 +34,7 @@ class LivePlayerPage extends StatefulWidget {
   State<LivePlayerPage> createState() => _LivePlayerPageState();
 }
 
-class _LivePlayerPageState extends State<LivePlayerPage> {
+class _LivePlayerPageState extends State<LivePlayerPage> with WidgetsBindingObserver {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   late final _controller = PlayerController<Channel>();
   final _isShowControls = ValueNotifier(false);
@@ -42,9 +42,11 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
   final _drawerUpdateStream = ValueNotifier(0);
   ScrollController _scrollController = ScrollController();
   StreamSubscription<bool>? _subscription;
+  bool _wentToBackground = false;
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     _subscription = _controlsStream.stream
         .switchMap((status) {
           switch (status) {
@@ -69,7 +71,37 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        _wentToBackground = true;
+      case AppLifecycleState.resumed:
+        if (_wentToBackground) {
+          _wentToBackground = false;
+          _reloadCurrentChannel();
+        }
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+    }
+  }
+
+  /// 从后台（例如按了电视的主页键）回到应用时，直播流已经停在旧的位置，画面会卡住，
+  /// 这里重新加载当前频道，从最新的直播位置开始播放
+  Future<void> _reloadCurrentChannel() async {
+    final item = _controller.currentItem;
+    if (item == null) return;
+    // 等待播放画面（Surface）重新创建
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
+    await _controller.setSource(null);
+    await _controller.setSource(item.toItem());
+    await _controller.play();
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _isShowControls.dispose();
     _controller.dispose();
     _subscription?.cancel();
