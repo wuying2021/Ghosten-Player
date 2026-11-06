@@ -53,7 +53,8 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.release
+            // 未配置 key.properties（例如在 GitHub Actions 上没有设置签名密钥）时使用 debug 签名
+            signingConfig = keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
         }
     }
 
